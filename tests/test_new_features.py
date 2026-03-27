@@ -239,19 +239,20 @@ class TestForceDownload:
     def test_media_agent_passes_force_to_service(self, tmp_path):
         """MediaAgent deve repassar o parâmetro force ao MediaService."""
         from agents.media_agent import MediaAgent
+        from models.post import InstagramPost, MediaItem, MediaType
 
         mock_svc = MagicMock()
-        mock_svc.download_post_media.side_effect = lambda post, force: (
+        mock_svc.download_post_media.side_effect = lambda post, force=False: (
             setattr(post, "local_dir", str(tmp_path / post.post_id)) or post
         )
 
-        posts = [{"id_pub": "p1", "shortcode": "p1", "caption": "", "media_type": "image",
-                  "media": [{"id": "m1", "link": "https://x.com/img.jpg", "type": "image"}]}]
+        post = InstagramPost(
+            post_id="p1", shortcode="p1", caption="", media_type=MediaType.IMAGE,
+            media_items=[MediaItem(media_id="m1", url="https://x.com/img.jpg", media_type=MediaType.IMAGE)],
+        )
 
         with patch("tools.instagram_tools._media_service", mock_svc):
-            agent = MediaAgent.__new__(MediaAgent)
-            agent._agent = MagicMock()
-            agent.run(json.dumps(posts), force=True)
+            MediaAgent().run([post], force=True)
 
         _, kwargs = mock_svc.download_post_media.call_args
         assert kwargs.get("force") is True

@@ -113,12 +113,9 @@ class TestMediaDownloadDelay:
 
     def test_delay_called_between_posts(self, tmp_path):
         from agents.media_agent import MediaAgent
-        import json
-
-        call_order = []
+        from models.post import InstagramPost, MediaItem, MediaType
 
         def fake_download(post, force=False):
-            call_order.append(f"download:{post.post_id}")
             post.local_dir = str(tmp_path / post.post_id)
             return post
 
@@ -126,17 +123,16 @@ class TestMediaDownloadDelay:
         mock_svc.download_post_media.side_effect = fake_download
 
         posts = [
-            {"id_pub": f"p{i}", "shortcode": f"p{i}", "caption": "",
-             "media_type": "image",
-             "media": [{"id": "m1", "link": "https://x.com/img.jpg", "type": "image"}]}
+            InstagramPost(
+                post_id=f"p{i}", shortcode=f"p{i}", caption="",
+                media_type=MediaType.IMAGE,
+                media_items=[MediaItem(media_id="m1", url="https://x.com/img.jpg", media_type=MediaType.IMAGE)],
+            )
             for i in range(3)
         ]
 
         with patch("tools.instagram_tools._media_service", mock_svc), \
              patch("agents.media_agent.jitter_sleep") as mock_jitter:
-            agent = MediaAgent.__new__(MediaAgent)
-            agent._agent = MagicMock()
-            agent.run(json.dumps(posts))
+            MediaAgent().run(posts)
 
-        # deve ter havido delays (um por post processado)
         assert mock_jitter.call_count >= 1

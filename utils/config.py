@@ -13,6 +13,10 @@ class Settings(BaseSettings):
     output_dir: str = "output"
     log_level: str = "INFO"
 
+    # Provider e modelo por agent — trocar aqui sem alterar código
+    media_agent_provider: str = "groq"
+    media_agent_model: str = "llama-3.3-70b-versatile"
+
     def posts_dir(self, username: str) -> Path:
         return Path(self.output_dir) / username / "posts"
 
