@@ -1,0 +1,6 @@
+[allowlist]
+description = "Tokens de push inicial já revogados no GitHub"
+commits = [
+    "3c83653",
+    "55a7c87",
+]

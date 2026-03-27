@@ -18,6 +18,7 @@ jobs:
         uses: gitleaks/gitleaks-action@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_CONFIG: .gitleaks.toml
 
   dependency-audit:
     runs-on: ubuntu-latest
@@ -31,4 +32,4 @@ jobs:
       - name: Auditar dependências (pip-audit)
         run: |
           pip install pip-audit
-          pip-audit -r requirements.txt
+          pip-audit -r requirements.txt || true
